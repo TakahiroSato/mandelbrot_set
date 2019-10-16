@@ -4,7 +4,7 @@ const ctx = canvas.getContext("2d");
 const width = canvas.width;
 const height = canvas.height;
 
-const calcMax = 100;
+let calcMax = 100;
 
 const mandelbrot = (x, y, cx = x, cy = y, m = calcMax) => {
   if (x * x + y * y > 4) {
@@ -53,6 +53,12 @@ const changeSlideX = e => {
 const changeSlideY = e => {
   document.getElementById("output_y").value = e.value;
   y = e.value;
+  draw();
+}
+
+const changeSlideCalc = e => {
+  document.getElementById("output_calc").value = e.value;
+  calcMax = e.value;
   draw();
 }
 
