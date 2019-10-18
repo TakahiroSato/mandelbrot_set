@@ -6,7 +6,8 @@
   "scripts": {
     "build": "webpack",
     "watch": "webpack --watch",
-    "serve": "webpack-dev-server"
+    "serve": "webpack-dev-server",
+    "update": "rm -rf node_modules/mandelbrot_set_wasm && npm i"
   },
   "repository": {
     "type": "git",
