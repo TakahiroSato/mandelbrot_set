@@ -1,6 +1,7 @@
 const mod = import("mandelbrot_set_wasm");
+const bg = import("mandelbrot_set_wasm/mandelbrot_set_wasm_bg");
 
-mod.then((mod) => {
+Promise.all([mod, bg]).then(([mod, { memory }]) => {
   const canvas = document.getElementById("canvas");
   const ctx = canvas.getContext("2d");
 
@@ -36,35 +37,75 @@ mod.then((mod) => {
   let y = 300;
 
   const draw = () => {
+    const draw_start = performance.now();
     ctx.clearRect(0, 0, width, height);
+    let start = performance.now();
+    const ptr = mod.img_gen(width, height, calcMax, x, y, mag);
+    //console.log(ptr);
+    //console.log(`img_gen : ${performance.now() - start}[ms]`);
+    start = performance.now();
+    const img = new Uint8ClampedArray(memory.buffer, ptr, 4 * width * height);
+    //console.log(`convert array : ${performance.now() - start}[ms]`);
     const imgData = new ImageData(
-      Uint8ClampedArray.from(mod.img_gen(width, height, calcMax, x, y, mag)),
+      img,
       width,
       height
     );
     ctx.putImageData(imgData, 0, 0);
+    //console.log(`draw : ${performance.now() - draw_start}[ms]`);
+
+    document.getElementById("output1").value = mag;
+    document.getElementById("output_x").value = x;
+    document.getElementById("output_y").value = y;
+    document.getElementById("output_calc").value = calcMax;
   };
 
+  document.getElementById("canvas").addEventListener("wheel", e => {
+    mag -= e.deltaY * Math.log10(mag);
+    draw();
+  });
+
+  let drag = false;
+  let startX = 0;
+  let startY = 0;
+  let startMouseX = 0;
+  let statrtMouseY = 0;
+  document.getElementById("canvas").addEventListener("mousedown", e => {
+    drag = true;
+    startMouseX = e.layerX;
+    startMouseY = e.layerY;
+    startX = x;
+    startY = y;
+  });
+
+  document.getElementById("canvas").addEventListener("mouseup", e => {
+    drag = false;
+  })
+
+  document.getElementById("canvas").addEventListener("mousemove", e => {
+    if (drag) {
+      x = startX - (startMouseX - e.layerX) * Math.log10(mag / 2);
+      y = startY - (startMouseY - e.layerY) * Math.log10(mag / 2);
+      draw();
+    }
+  });
+
   document.getElementById("slide1").addEventListener("input", e => {
-    document.getElementById("output1").value = e.target.value;
     mag = e.target.value;
     draw();
   });
 
   document.getElementById("slide_x").addEventListener("input", e => {
-    document.getElementById("output_x").value = e.target.value;
     x = e.target.value;
     draw();
   });
 
   document.getElementById("slide_y").addEventListener("input", e => {
-    document.getElementById("output_y").value = e.target.value;
     y = e.target.value;
     draw();
   });
 
   document.getElementById("slide_calc").addEventListener("input", e => {
-    document.getElementById("output_calc").value = e.target.value;
     calcMax = e.target.value;
     draw();
   });

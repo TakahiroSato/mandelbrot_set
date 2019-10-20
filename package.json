@@ -4,10 +4,10 @@
   "description": "マンデルブロ集合描画プログラム",
   "main": "index.js",
   "scripts": {
-    "build": "webpack",
+    "build": "rm dist/* && webpack",
     "watch": "webpack --watch",
     "serve": "webpack-dev-server",
-    "update": "rm -rf node_modules/mandelbrot_set_wasm && npm i"
+    "update": "rm -rf node_modules/mandelbrot_set_wasm && npm i && npm run build"
   },
   "repository": {
     "type": "git",
