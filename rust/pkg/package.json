@@ -1,0 +1,15 @@
+{
+  "name": "mandelbrot_set_wasm",
+  "collaborators": [
+    "takahirosato"
+  ],
+  "version": "0.1.0",
+  "files": [
+    "mandelbrot_set_wasm_bg.wasm",
+    "mandelbrot_set_wasm.js",
+    "mandelbrot_set_wasm.d.ts"
+  ],
+  "module": "mandelbrot_set_wasm.js",
+  "types": "mandelbrot_set_wasm.d.ts",
+  "sideEffects": "false"
+}
