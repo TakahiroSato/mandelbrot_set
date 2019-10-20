@@ -20,7 +20,7 @@
   },
   "homepage": "https://github.com/TakahiroSato/mandelbrot_set#readme",
   "dependencies": {
-    "mandelbrot_set_wasm": "git+ssh://git@github.com/TakahiroSato/mandelbrot_set_wasm.git"
+    "mandelbrot_set_wasm": "./rust/pkg"
   },
   "devDependencies": {
     "webpack": "^4.41.2",
