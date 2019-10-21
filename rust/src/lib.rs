@@ -40,12 +40,15 @@ pub fn img_gen(w: usize, h: usize, limit: u16, offset_x: f64, offset_y: f64, mag
     for x in 0..w {
         let tx = start_x + addx;
         let ty = start_y + addy;
-        let color = mandelbrot(tx, ty, limit);
+        let v = mandelbrot(tx, ty, limit);
         let offset = 4 * (w * y + x);
-        if color < 255 {
-            buf[offset] = color;
-            buf[offset + 1] = color;
-            buf[offset + 2] = color;
+        if v < 255 {
+            let r = if v % 2 == 0 && v != 0 { 234 } else if v != 0 { 181 } else { v };
+            let g = if v % 2 == 0 && v != 0 { 145 } else if v != 0 { 255 } else { v };
+            let b = if v % 2 == 0 && v != 0 { 152 } else if v != 0 { 20 } else { v };
+            buf[offset] = r;
+            buf[offset + 1] = g;
+            buf[offset + 2] = b;
             buf[offset + 3] = 255;
         }
         addx += dx;
