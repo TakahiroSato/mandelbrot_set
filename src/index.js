@@ -32,7 +32,7 @@ Promise.all([mod, bg]).then(([mod, { memory }]) => {
     }
   };
 
-  const js_draw = (f=mandelbrot_roop) => {
+  const js_draw = (f = mandelbrot_roop) => {
     ctx.clearRect(0, 0, width, height);
     const imgData = ctx.createImageData(width, height);
     for (let i = 0; i < height; i++) {
@@ -81,10 +81,10 @@ Promise.all([mod, bg]).then(([mod, { memory }]) => {
 
   document.getElementById("canvas").addEventListener("wheel", e => {
     const oldMag = mag;
-    mag -= e.deltaY * Math.log(mag);
+    mag -= e.deltaY * (mag / (width));
     if (mag <= 0) mag = 100;
-    x = (width/2) + (mag/oldMag)*(x-e.layerX);
-    y = (height/2) + (mag/oldMag)*(y-e.layerY);
+    x = (width / 2) + (mag / oldMag) * (x - e.layerX);
+    y = (height / 2) + (mag / oldMag) * (y - e.layerY);
     draw();
     e.preventDefault();
   });
@@ -115,7 +115,10 @@ Promise.all([mod, bg]).then(([mod, { memory }]) => {
   });
 
   document.getElementById("slide1").addEventListener("input", e => {
+    const oldMag = mag;
     mag = e.target.value;
+    x = (width / 2) + (mag / oldMag) * (x - (width / 2));
+    y = (height / 2) + (mag / oldMag) * (y - (height / 2));
     draw();
   });
 
