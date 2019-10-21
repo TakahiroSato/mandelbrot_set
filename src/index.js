@@ -15,7 +15,7 @@ Promise.all([mod, bg]).then(([mod, { memory }]) => {
       return 255 * (m / calcMax);
     }
     if (m == 0) return 0;
-    return mandelbrot(x * x - y * y + cx, 2 * x * y + cy, cx, cy, m - 1);
+    return mandelbrot_recur(x * x - y * y + cx, 2 * x * y + cy, cx, cy, m - 1);
   };
 
   const mandelbrot_roop = (x, y, cx = x, cy = y, m = calcMax) => {
@@ -32,27 +32,46 @@ Promise.all([mod, bg]).then(([mod, { memory }]) => {
     }
   };
 
+  const js_draw = (f=mandelbrot_roop) => {
+    ctx.clearRect(0, 0, width, height);
+    const imgData = ctx.createImageData(width, height);
+    for (let i = 0; i < height; i++) {
+      for (let j = 0; j < width; j++) {
+        const tx = (j - x) / mag;
+        const ty = (i - y) / mag;
+        const color = f(tx, ty);
+        if (color < 255) {
+          imgData.data[j * 4 + i * imgData.width * 4] = color;
+          imgData.data[1 + j * 4 + i * imgData.width * 4] = color;
+          imgData.data[2 + j * 4 + i * imgData.width * 4] = color;
+          imgData.data[3 + j * 4 + i * imgData.width * 4] = 255;
+        }
+      }
+
+      ctx.putImageData(imgData, 0, 0);
+    }
+  }
+
   let mag = 300;
   let x = 600;
   let y = 300;
 
-  const draw = () => {
-    const draw_start = performance.now();
+  const wasm_draw = () => {
     ctx.clearRect(0, 0, width, height);
-    let start = performance.now();
     const ptr = mod.img_gen(width, height, calcMax, x, y, mag);
-    //console.log(ptr);
-    //console.log(`img_gen : ${performance.now() - start}[ms]`);
-    start = performance.now();
     const img = new Uint8ClampedArray(memory.buffer, ptr, 4 * width * height);
-    //console.log(`convert array : ${performance.now() - start}[ms]`);
     const imgData = new ImageData(
       img,
       width,
       height
     );
     ctx.putImageData(imgData, 0, 0);
-    //console.log(`draw : ${performance.now() - draw_start}[ms]`);
+  };
+
+  const draw = () => {
+    // const draw_start = performance.now();
+    wasm_draw();
+    // console.log(`draw: ${performance.now() - draw_start}[ms]`);
 
     document.getElementById("output1").value = mag;
     document.getElementById("output_x").value = x;
@@ -61,8 +80,13 @@ Promise.all([mod, bg]).then(([mod, { memory }]) => {
   };
 
   document.getElementById("canvas").addEventListener("wheel", e => {
-    mag -= e.deltaY * Math.log10(mag);
+    const oldMag = mag;
+    mag -= e.deltaY * Math.log(mag);
+    if (mag <= 0) mag = 100;
+    x = (width/2) + (mag/oldMag)*(x-e.layerX);
+    y = (height/2) + (mag/oldMag)*(y-e.layerY);
     draw();
+    e.preventDefault();
   });
 
   let drag = false;
@@ -72,10 +96,10 @@ Promise.all([mod, bg]).then(([mod, { memory }]) => {
   let statrtMouseY = 0;
   document.getElementById("canvas").addEventListener("mousedown", e => {
     drag = true;
-    startMouseX = e.layerX;
-    startMouseY = e.layerY;
     startX = x;
     startY = y;
+    startMouseX = e.layerX;
+    startMouseY = e.layerY;
   });
 
   document.getElementById("canvas").addEventListener("mouseup", e => {
@@ -84,8 +108,8 @@ Promise.all([mod, bg]).then(([mod, { memory }]) => {
 
   document.getElementById("canvas").addEventListener("mousemove", e => {
     if (drag) {
-      x = startX - (startMouseX - e.layerX) * Math.log10(mag / 2);
-      y = startY - (startMouseY - e.layerY) * Math.log10(mag / 2);
+      x = startX - (startMouseX - e.layerX) * (mag / width);
+      y = startY - (startMouseY - e.layerY) * (mag / height);
       draw();
     }
   });

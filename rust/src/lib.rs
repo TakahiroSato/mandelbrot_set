@@ -58,5 +58,10 @@ pub fn img_gen(w: usize, h: usize, limit: u16, offset_x: f64, offset_y: f64, mag
 
 #[test]
 fn test_mandelbrot() {
-  let o = img_gen(10, 10, 10, 0., 0., 100.);
+  let o = img_gen(10, 10, 10, 0., 0., 300.);
+  for i in 0..10 {
+    for j in 0..10 {
+      println!("{}", unsafe { *(o.offset(i*10+j)) });
+    }
+  }
 }
