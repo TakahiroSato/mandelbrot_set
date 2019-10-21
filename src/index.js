@@ -108,8 +108,8 @@ Promise.all([mod, bg]).then(([mod, { memory }]) => {
 
   document.getElementById("canvas").addEventListener("mousemove", e => {
     if (drag) {
-      x = startX - (startMouseX - e.layerX) * (mag / width);
-      y = startY - (startMouseY - e.layerY) * (mag / height);
+      x = startX * (1 - (startMouseX - e.layerX) / width);
+      y = startY * (1 - (startMouseY - e.layerY) / height);
       draw();
     }
   });
